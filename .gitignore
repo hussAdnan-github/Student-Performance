@@ -34,7 +34,6 @@ Thumbs.db
 # Ignore model artifacts
 *.h5
 *.hdf5
-*.pkl
 *.joblib
 *.pt
 *.onnx
