@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
-from pycaret.classification import load_model, predict_model
+import joblib  # سنستخدم joblib لتحميل الموديل
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -9,7 +9,7 @@ from pydantic import BaseModel
 # 1. إنشاء التطبيق
 app = FastAPI()
 
-# 2. إعدادات CORS (خارج الدالة - في المكان الصحيح)
+# 2. إعدادات CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,9 +18,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 3. تحميل الموديل (تأكد من أن الملف موجود في نفس المجلد)
-# ملاحظة: إذا كان اسم الملف "best_student_grade_model.pkl" نكتب الاسم بدون .pkl
-model = load_model("best_student_grade_model")
+# 3. تحميل الموديل باستخدام joblib
+# ملاحظة: تأكد أن ملف الموديل هو "best_student_grade_model.pkl" وموجود بجانب هذا الملف
+model = joblib.load("best_student_grade_model.pkl")
 
 # 4. تعريف هيكل البيانات المستقبلة
 class InputData(BaseModel):
@@ -47,12 +47,12 @@ def predict(data: InputData):
     # تحويل البيانات إلى DataFrame
     df = pd.DataFrame([data.model_dump()])
     
-    # إجراء التنبؤ باستخدام PyCaret
-    prediction_df = predict_model(model, data=df)
+    # إجراء التنبؤ باستخدام الموديل مباشرة (الذي هو عبارة عن Pipeline)
+    # الموديلات المحفوظة من PyCaret تحتوي بداخلها على كل خطوات معالجة البيانات
+    prediction = model.predict(df)
 
-    # استخراج القيمة المتوقعة (تأكد من اسم العمود في PyCaret)
-    # عادة يكون 'prediction_label' أو 'Label'
-    result = str(prediction_df["prediction_label"].iloc[0])
+    # استخراج القيمة المتوقعة
+    result = str(prediction[0])
 
     return {
         "prediction": result
@@ -60,4 +60,5 @@ def predict(data: InputData):
 
 # 7. تشغيل السيرفر
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    # ملاحظة: عند الرفع على Render، المنصة هي من تشغل uvicorn، هذا السطر للتجربة المحلية فقط
+    uvicorn.run(app, host="0.0.0.0", port=8000)
