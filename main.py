@@ -6,7 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pydantic import BaseModel
 
- app = FastAPI()
+# 1. إنشاء التطبيق
+app = FastAPI()
 
 # 2. إعدادات CORS
 app.add_middleware(
