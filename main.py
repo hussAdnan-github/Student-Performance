@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pydantic import BaseModel
-
+from pycaret.classification import load_model
 # 1. إنشاء التطبيق
 app = FastAPI()
 
@@ -20,7 +20,7 @@ app.add_middleware(
 
 # 3. تحميل الموديل باستخدام joblib
 # ملاحظة: تأكد أن ملف الموديل هو "best_student_grade_model.pkl" وموجود بجانب هذا الملف
-model = joblib.load("best_student_grade_model.pkl")
+model = load_model("best_student_grade_model")
 
 # 4. تعريف هيكل البيانات المستقبلة
 class InputData(BaseModel):
